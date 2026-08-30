@@ -1,5 +1,12 @@
 import { Operation } from "@/app/types";
 
+const RESPONSE_FORMAT_INSTRUCTIONS = `
+Return your response with these fields:
+- "result": the transformed text itself
+- "summary": a brief, one-sentence description of what changes you made
+- "tone": a single word describing the tone of the result (e.g. "concise", "professional", "casual")
+`;
+
 export function summarizePrompt(text: string): string {
   return `You are a professional editor skilled at distilling text down to its essential points.
 
@@ -9,8 +16,7 @@ Text to summarize:
 """
 ${text}
 """
-
-Respond with only the summary, no preamble or explanation.`;
+${RESPONSE_FORMAT_INSTRUCTIONS}`;
 }
 
 export function rewritePrompt(text: string): string {
@@ -22,8 +28,7 @@ Text to rewrite:
 """
 ${text}
 """
-
-Respond with only the rewritten text, no preamble or explanation.`;
+${RESPONSE_FORMAT_INSTRUCTIONS}`;
 }
 
 export function professionalPrompt(text: string): string {
@@ -35,8 +40,7 @@ Text to rewrite:
 """
 ${text}
 """
-
-Respond with only the rewritten text, no preamble or explanation.`;
+${RESPONSE_FORMAT_INSTRUCTIONS}`;
 }
 
 export function friendlyPrompt(text: string): string {
@@ -48,11 +52,9 @@ Text to rewrite:
 """
 ${text}
 """
-
-Respond with only the rewritten text, no preamble or explanation.`;
+${RESPONSE_FORMAT_INSTRUCTIONS}`;
 }
 
-// Maps each Operation to its corresponding prompt function
 const PROMPT_BUILDERS: Record<Operation, (text: string) => string> = {
   summarize: summarizePrompt,
   rewrite: rewritePrompt,
