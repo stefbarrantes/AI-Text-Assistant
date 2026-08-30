@@ -1,8 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { Operation } from "../types";
+import ReactMarkdown from "react-markdown";
+import OperationSelector from "./OperationSelector";
 
 export default function Generator() {
+  const [operation, setOperation] = useState<Operation>("summarize");
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,7 +24,7 @@ export default function Generator() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ text: prompt, operation }),
       });
 
       const data = await res.json();
@@ -40,6 +44,8 @@ export default function Generator() {
   return (
     <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 py-8">
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <OperationSelector value={operation} onChange={setOperation} />
+
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
@@ -47,6 +53,7 @@ export default function Generator() {
           rows={4}
           className="w-full p-3 text-base text-gray-900 placeholder-gray-400 bg-white rounded-lg border border-gray-300 resize-y focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
+
         <button
           type="submit"
           disabled={loading || !prompt.trim()}
@@ -71,7 +78,7 @@ export default function Generator() {
 
       {result && (
         <div className="mt-5 p-4 sm:p-5 bg-gray-50 border border-gray-200 rounded-lg text-gray-800 text-base leading-relaxed whitespace-pre-wrap break-words">
-          {result}
+          <ReactMarkdown>{result}</ReactMarkdown>
         </div>
       )}
     </div>
