@@ -1,4 +1,4 @@
-import { AIResponse } from "@/app/types";
+import { AIResponse } from "@/types/types";
 
 export function isValidAIResponse(value: unknown): value is AIResponse {
   if (typeof value !== "object" || value === null) return false;

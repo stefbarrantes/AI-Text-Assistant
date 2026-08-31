@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AIResponse, Operation } from "@/types/types";
-import { buildPrompt } from "@/lib/prompts";
-import { validateGenerateRequest } from "@/lib/validation/generateRequest";
-import { isValidAIResponse } from "@/lib/validation/aiResponse";
+import { CustomerResponse } from "@/types/types";
+import { buildCustomerResponsePrompt } from "@/lib/prompts/customerResponse";
+import { isValidCustomerResponse } from "@/lib/validation/customerResponse";
 import { getGeminiEndpoint } from "@/lib/config";
+import { validateCustomerRequest } from "@/lib/validation/customerRequest";
 
 const RESPONSE_SCHEMA = {
   type: "object",
   properties: {
-    result: { type: "string" },
-    summary: { type: "string" },
+    response: { type: "string" },
     tone: { type: "string" },
+    category: { type: "string" },
+    requiresMoreInformation: { type: "boolean" },
   },
-  required: ["result", "summary", "tone"],
+  required: ["response", "tone", "category", "requiresMoreInformation"],
 };
 
 export async function POST(req: NextRequest) {
@@ -24,13 +25,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
-    const validation = validateGenerateRequest(body);
+    const validation = validateCustomerRequest(body);
     if (!validation.valid) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
-    const { text, operation } = body as { text: string; operation: Operation };
-    const finalPrompt = buildPrompt(operation, text);
+    const message = validation.message;
+    if (!message) {
+      return NextResponse.json(
+        { error: "Missing 'message' field" },
+        { status: 400 },
+      );
+    }
+
+    const finalPrompt = buildCustomerResponsePrompt(message);
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
@@ -40,7 +48,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const response = await fetch(getGeminiEndpoint(), {
+    const geminiResponse = await fetch(getGeminiEndpoint(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -52,15 +60,15 @@ export async function POST(req: NextRequest) {
       }),
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
+    if (!geminiResponse.ok) {
+      const errorText = await geminiResponse.text();
       return NextResponse.json(
         { error: "Gemini API error", details: errorText },
-        { status: response.status },
+        { status: geminiResponse.status },
       );
     }
 
-    const data = await response.json();
+    const data = await geminiResponse.json();
     const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!rawText) {
@@ -70,7 +78,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // validate the response
     let parsed: unknown;
     try {
       parsed = JSON.parse(rawText);
@@ -81,15 +88,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!isValidAIResponse(parsed)) {
+    if (!isValidCustomerResponse(parsed)) {
       return NextResponse.json(
         { error: "Model response failed validation" },
         { status: 502 },
       );
     }
 
-    // parsed is now safely typed as AIResponse
-    return NextResponse.json(parsed satisfies AIResponse);
+    return NextResponse.json(parsed satisfies CustomerResponse);
   } catch (err) {
     console.error(err);
     return NextResponse.json(

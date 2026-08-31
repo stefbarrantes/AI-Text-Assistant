@@ -5,3 +5,12 @@ export interface AIResponse {
   summary: string; // a one-line description of what was done
   tone: string; // the tone of the output (e.g. "professional", "casual")
 }
+export interface CustomerResponse {
+  response: string;
+  tone: string;
+  category: string;
+  requiresMoreInformation: boolean;
+}
+
+export type ChatRole = "user" | "assistant";
+export type ChatMessage = { id: string; role: ChatRole; content: string };

@@ -1,6 +1,6 @@
 "use client";
 
-import { Operation } from "@/app/types";
+import { Operation } from "@/types/types";
 
 export const OPERATIONS: { value: Operation; label: string }[] = [
   { value: "summarize", label: "Summarize" },

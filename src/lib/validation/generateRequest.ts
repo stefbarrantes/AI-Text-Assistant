@@ -1,4 +1,4 @@
-import { Operation } from "@/app/types";
+import { Operation } from "@/types/types";
 
 const VALID_OPERATIONS: Operation[] = [
   "summarize",

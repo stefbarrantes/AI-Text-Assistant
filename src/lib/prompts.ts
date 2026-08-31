@@ -1,4 +1,4 @@
-import { Operation } from "@/app/types";
+import { Operation } from "@/types/types";
 
 const RESPONSE_FORMAT_INSTRUCTIONS = `
 Return your response with these fields:

@@ -1,13 +1,12 @@
-import Generator from "./components/Generator";
+import FeatureLinks from "@/components/FeatureLinks";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <h1 className="text-center pt-10 text-2xl sm:text-3xl font-bold text-gray-900">
-          LLM Playground
-        </h1>
-        <Generator />
+    <div className="min-h-screen bg-slate-50">
+      <main className="min-h-screen bg-slate-50">
+        <div className="mx-auto flex w-full max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
+          <FeatureLinks />
+        </div>
       </main>
     </div>
   );
